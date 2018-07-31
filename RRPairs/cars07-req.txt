@@ -1,0 +1,4 @@
+GET /inventory/carMake/1/models.json  HTTP/1.1
+Content-Type: application/json
+Connection: Keep-Alive
+Accept: text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2

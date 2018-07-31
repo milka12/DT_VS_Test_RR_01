@@ -1,0 +1,4 @@
+GET /loan/lisa.simpson HTTP/1.1
+Content-Type: application/json
+Connection: Keep-Alive
+User-Agent: LISA
