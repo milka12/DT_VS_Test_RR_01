@@ -1,0 +1,185 @@
+node {
+    
+   def vseID = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+    
+	def sessionId = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+    
+	def tpId = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+    
+	def dpId = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+    
+	def bundleId = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+    
+	def inputContainerId = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+    
+	def processorId = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+    
+	def procId = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+	
+	def BundleProcStatus = 'IN_PROCESS'
+    
+	//def devTestServer = 'DTServer1'
+	def devTestServer = 'milka12-t17573'
+	
+	def vseServer = 'VSE'
+	
+	def serviceName = 'Cars_RR_REST01'
+	
+	def serviceDesc = 'Cars from RR Pairs RESTDPH'
+	
+	def tPtypeId = 'HTTP'
+	def tPbasePath = '/'
+	def tPuseGateway = 'true'
+	def tPhostHeaderPassThrough = 'false'
+	def tPrecordingEndpointHost = 'localhost'
+	def tPrecordingEndpointPort = '7002'
+	def tPtargetEndpointHost = 'localhost'
+	def tPtargetEndpointPort = '51222'
+	
+	def dataProtocol = 'RESTDPH'
+	//Alternatives are 'SOAPDPH', 'JSONDPH' and 'XMLDPH', 'RESTDPH'
+    
+ 
+   stage('Retreive Project from Github') {
+       // clean
+       //bat 'git clean -fdx'
+       // Git Project downloaded to workspace
+       git 'https://github.com/milka12/DT_VS_Test_RR'
+    //  curl -X POST -H "authorization: Basic YWRtaW46YWRtaW4=" "DTServer1:1505/lisa-test-invoke/api/v1/tests/run " -H "content-type: multipart/form-data" -F file=@"//DTSERVER1/DTShare/cars-baseline-rest-test.mar"
+   }
+
+  stage('Get VSE ID') {
+           def responseVSEResponse = ''
+         withCredentials([usernamePassword(credentialsId: '5aec06db-b61e-4df4-a949-673793a6f5c6', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+             responseVSEResponse = bat returnStdout: true, script: """curl -i -X GET -u $USERNAME:$PASSWORD  http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses"""
+             }
+
+            echo 'Response VSEInfo= ' + responseVSEResponse
+            def startID = responseVSEResponse.indexOf("""${vseServer}""") - 58
+            def endID = startID + 46
+            vseID = responseVSEResponse.substring(startID,endID)
+           echo 'VSE ID  = ' +  vseID        
+   }
+   
+      stage('Get VSE Service List') {
+        // Get List of  virtual Services
+       bat  """curl -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/services\" """
+   } 
+   
+   stage('Create Builder Session') {
+           
+           //def responseVSEResponse = httpRequest consoleLogResponseBody: true, httpMode:'POST',  customHeaders: [[name: 'Authorization', value: 'Basic YWRtaW46YWRtaW4=']], url: 'http://DTServer1:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/vsBuilderSessions'
+           def rspBuilder = httpRequest consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', httpMode: 'POST',  customHeaders: [[name: 'Authorization', value: 'Basic YWRtaW46YWRtaW4=']], requestBody: """{\"name\":\"${serviceName}\",\"description\":\"${serviceDesc}\"}""", responseHandle: 'NONE', url: """http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/vsBuilderSessions"""
+			echo 'Response rspBuilder= ' + rspBuilder.content
+            def jsonBuilder = readJSON text: rspBuilder.content
+             sessionId = jsonBuilder['id'].toString()
+           echo 'Builder sessionId  = ' +  sessionId
+        
+   }
+   
+    stage('Create Transport Protocol') {
+			def rspTP = httpRequest consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', httpMode: 'POST',  customHeaders: [[name: 'Authorization', value: 'Basic YWRtaW46YWRtaW4=']], requestBody: """{\"typeId\": \"${tPtypeId}\", \"basePath\": \"${tPbasePath}\", \"useGateway\": true, \"hostHeaderPassThrough\": false, \"recordingEndpoint\": {\"host\": \"${tPrecordingEndpointHost}\", \"port\": \"${tPrecordingEndpointPort}\"}, \"targetEndpoint\": {\"host\": \"${tPtargetEndpointHost}\", \"port\": \"${tPtargetEndpointPort}\"}}""", responseHandle: 'NONE', url: """http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/vsBuilderSessions/${sessionId}/transportProtocols"""
+			echo 'Response rspTP= ' + rspTP.content
+            def jsonTP = readJSON text: rspTP.content
+            tpId = jsonTP['id'].toString()
+           echo 'TP sessionId  = ' +  tpId
+   }
+ 
+    stage('Add Data Protocol') {
+			def rspDP = httpRequest consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', httpMode: 'POST',  customHeaders: [[name: 'Authorization', value: 'Basic YWRtaW46YWRtaW4=']], requestBody: """{\"forRequest\": true, \"typeId\": \"${dataProtocol}\" }""", responseHandle: 'NONE', url: """http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/vsBuilderSessions/${sessionId}/transportProtocols/${tpId}/dataProtocols"""
+			echo 'Response rspDP= ' + rspDP.content
+            def jsonDP = readJSON text: rspDP.content
+            dpId = jsonDP['id'].toString()
+           echo 'DP sessionId  = ' +  dpId
+   }
+ 
+    stage('Create Transaction Bundle') {
+           def rspBundle = httpRequest consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', httpMode: 'POST',  customHeaders: [[name: 'Authorization', value: 'Basic YWRtaW46YWRtaW4=']], responseHandle: 'NONE', url: """http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/bundles"""
+			echo 'Response rspBundle= ' + rspBundle.content
+            def jsonBundle = readJSON text: rspBundle.content
+             bundleId = jsonBundle['id'].toString()
+           echo 'bundleId  = ' +  bundleId
+   }
+  
+    stage('Create InputContainer') {
+			def rspIC = httpRequest consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', httpMode: 'POST',  customHeaders: [[name: 'Authorization', value: 'Basic YWRtaW46YWRtaW4=']], responseHandle: 'NONE', url: """http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/bundles/${bundleId}/inputContainers"""
+			echo 'Response rspIC= ' + rspIC.content
+            def jsonIC = readJSON text: rspIC.content
+             inputContainerId = jsonIC['id'].toString()
+           echo 'inputContainerId  = ' +  inputContainerId
+   }
+   
+   stage('Iterate RRPair Files Load to InputContainer') {
+     // Get MAr files downloaded to workspace
+     def files = findFiles(glob: '**/RRPairs/**-r**.txt')
+     //echo """${files[0].name} ${files[0].path} ${files[0].directory} ${files[0].length} ${files[0].lastModified}"""
+	def myFile = """${files[0].name}"""
+	// Windows use '\' Mac /Linux use '/'
+	def ws = pwd() + '\\RRPairs\\'
+	
+	// iterate through files
+    for (ii = 0; ii < files.size(); ii++) {
+        echo 'working on ' + """${files[ii].name}"""
+        myFile = ws  + """${files[ii].name}"""
+		echo 'myFile = ' + myFile
+         bat """curl -i -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" ""http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/bundles/${bundleId}/inputContainers/${inputContainerId}/contents"" -H \"content-type: multipart/form-data\" -F \"file=@${myFile}\"""" 
+		}   
+    }
+    
+    stage('Process Data InputContainer') {
+			def rspPD = httpRequest consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', httpMode: 'POST',  customHeaders: [[name: 'Authorization', value: 'Basic YWRtaW46YWRtaW4=']], requestBody: """{\"container\": \"${inputContainerId}\" }""", responseHandle: 'NONE', url: """http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/bundles/${bundleId}/inputProcessors"""
+			echo 'Response rspPD= ' + rspPD.content
+            def jsonPD = readJSON text: rspPD.content
+            inputProcId = jsonPD['id'].toString()
+           echo 'inputProcId  = ' +  inputProcId
+    }
+ 
+  
+    stage('Create Bundle Processor') {
+			def rspBP = httpRequest consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', httpMode: 'POST',  customHeaders: [[name: 'Authorization', value: 'Basic YWRtaW46YWRtaW4=']], requestBody: """{\"sessionId\": \"${sessionId}\", \"bundleId\": \"${bundleId}\" }""", responseHandle: 'NONE', url: """http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}//bundleProcessors"""
+			echo 'Response rspDP= ' + rspBP.content
+            def jsonBP = readJSON text: rspBP.content
+             BundleProcId = jsonBP['id'].toString()
+             BundleProcStatus = jsonBP['status'].toString()
+           echo 'BundleProcId  = ' +  BundleProcId
+           echo 'BundleProcStatus  = ' +  BundleProcStatus
+    }
+   
+     stage('Check Bundle Processor Status') {
+		if(BundleProcStatus.contains("IN_PROCESS")) {
+            echo 'Waiting on Bundle Processor'
+			sleep 5
+			def rspBPS = ''
+		    def jsonBPS = ''
+            try{
+                retry(3) {
+                    rspBPS = httpRequest consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', httpMode: 'GET',  customHeaders: [[name: 'Authorization', value: 'Basic YWRtaW46YWRtaW4=']], requestBody: """{\"sessionId\": \"${sessionId}\", \"bundleId\": \"${bundleId}\" }""", responseHandle: 'NONE', url: """http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}//bundleProcessors/${BundleProcId}"""
+					jsonBPS = readJSON text: rspBPS.content
+					BundleProcStatus = jsonBPS['status'].toString()
+					if (BundleProcStatus == 'IN_PROCESS') {
+                        sleep 5
+						throw new Exception()
+                    }
+                    currentBuild.result = "SUCCESS"
+                    println("Job was successful. currentBuild.result: ${currentBuild.result}")
+                }
+            } catch (e) {
+                currentBuild.result = "FAILURE"
+                println("catch exeption. currentBuild.result: ${currentBuild.result}")
+            }
+            }
+	}
+	
+	stage('Create VS Zip_MAR_File') {
+		def rspIC = httpRequest acceptType: 'APPLICATION_ZIP', outputFile: """${serviceName}.zip""", responseHandle: 'LEAVE_OPEN', contentType: 'APPLICATION_JSON', httpMode: 'GET',  customHeaders: [[name: 'Authorization', value: 'Basic YWRtaW46YWRtaW4=']], url: """http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/vsBuilderSessions/${sessionId}"""
+		echo 'Create VS Zip= ' + rspIC
+   }
+
+	
+	
+    stage('Deploy VS Zip')  {
+       def zipFile = """${serviceName}.zip"""
+      bat """curl -X POST  ""http://${devTestServer}:1505/api/Dcm/VSEs/VSE/actions/deployMar"" -H \"authorization: Basic YWRtaW46YWRtaW4=\" -H \"content-type: multipart/form-data\" -F file=@${zipFile}""" 
+   }
+
+}
