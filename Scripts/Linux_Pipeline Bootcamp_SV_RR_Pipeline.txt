@@ -132,7 +132,7 @@ node {
         myFile = ws  + """${files[ii].name}"""
 		echo 'myFile = ' + myFile
         // Linux / Mac
-		sh(script: """curl -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/bundles/${bundleId}/inputContainers/${inputContainerId}/contents"" -H \"content-type: multipart/form-data\" -F \"file=@${myFile}\"""", returnStdout: true)
+		sh(script: """curl -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/bundles/${bundleId}/inputContainers/${inputContainerId}/contents\" -H \"content-type: multipart/form-data\" -F \"file=@${myFile}\"""", returnStdout: true)
         // Windows
 		//bat """curl -i -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" ""http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/bundles/${bundleId}/inputContainers/${inputContainerId}/contents"" -H \"content-type: multipart/form-data\" -F \"file=@${myFile}\"""" 
 		}   
@@ -192,7 +192,7 @@ node {
     stage('Deploy VS Zip')  {
        def zipFile = """${serviceName}.zip"""
         // Linux / Mac
-		sh(script: """curl -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/api/Dcm/VSEs/VSE/actions/deployMar"" -H \"content-type: multipart/form-data\" -F \"file=@${zipFile}\"""", returnStdout: true)
+		sh(script: """curl -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/api/Dcm/VSEs/VSE/actions/deployMar\" -H \"content-type: multipart/form-data\" -F \"file=@${zipFile}\"""", returnStdout: true)
         // Windows
 		//bat """curl -X POST  ""http://${devTestServer}:1505/api/Dcm/VSEs/VSE/actions/deployMar"" -H \"authorization: Basic YWRtaW46YWRtaW4=\" -H \"content-type: multipart/form-data\" -F file=@${zipFile}""" 
    }
