@@ -48,37 +48,35 @@ node {
     //  curl -X POST -H "authorization: Basic YWRtaW46YWRtaW4=" "DTServer1:1505/lisa-test-invoke/api/v1/tests/run " -H "content-type: multipart/form-data" -F file=@"//DTSERVER1/DTShare/cars-baseline-rest-test.mar"
    }
 
-  stage('Get VSE ID') {
+   stage('Get VSE ID') {
            def responseVSEResponse = ''
-		//Linux / Mac using Credential in Jenkins Store
-        // withCredentials([usernamePassword(credentialsId: 'b3cc5e25-544b-434e-89f2-5085aa8c0fec', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-        // responseVSEResponse = sh(script: """curl -i -X GET -u $USERNAME:$PASSWORD  http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses""", returnStdout: true)
-        // }
-		// Linux / Mac Basic Authorization
-        //responseVSEResponse = sh(script: """curl -i -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses""", returnStdout: true)
+		   //Linux / Mac using Credential in Jenkins Store
+           // withCredentials([usernamePassword(credentialsId: 'b3cc5e25-544b-434e-89f2-5085aa8c0fec', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+           // responseVSEResponse = sh(script: """curl -i -X GET -u $USERNAME:$PASSWORD  http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses""", returnStdout: true)
+           // }
+			// Linux / Mac Basic Authorization
+            responseVSEResponse = sh(script: """curl -i -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses""", returnStdout: true)
 			
 		// Windows using Credential in Jenkins Store
 		//withCredentials([usernamePassword(credentialsId: '5aec06db-b61e-4df4-a949-673793a6f5c6', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
         //  responseVSEResponse = bat returnStdout: true, script: """curl -i -X GET -u $USERNAME:$PASSWORD  http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses"""
 		//}
  		// Windows  Basic Authorization
-		responseVSEResponse = bat returnStdout: true, script: """curl -i -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses"""
-            echo 'Response VSEInfo= ' + responseVSEResponse
+		//responseVSEResponse = bat returnStdout: true, script: """curl -i -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses"""
+ 
+       echo 'Response VSEInfo= ' + responseVSEResponse
+          //  def startID = responseVSEResponse.indexOf('invoke/api/v2/vses/') + 19
             def startID = responseVSEResponse.indexOf("""${vseServer}""") - 58
             def endID = startID + 46
             vseID = responseVSEResponse.substring(startID,endID)
            echo 'VSE ID  = ' +  vseID        
    }
    
-      stage('Get VSE Service List') {
-        // Get List of  virtual Services
-       bat  """curl -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/services\" """
-   } 
-   
    stage('Create Builder Session') {
            
            //def responseVSEResponse = httpRequest consoleLogResponseBody: true, httpMode:'POST',  customHeaders: [[name: 'Authorization', value: 'Basic YWRtaW46YWRtaW4=']], url: 'http://DTServer1:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/vsBuilderSessions'
-           def rspBuilder = httpRequest consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', httpMode: 'POST',  customHeaders: [[name: 'Authorization', value: 'Basic YWRtaW46YWRtaW4=']], requestBody: """{\"name\":\"${serviceName}\",\"description\":\"${serviceDesc}\"}""", responseHandle: 'NONE', url: """http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/vsBuilderSessions"""
+           // httpRequest same for Windows / Linux / Mac
+		   def rspBuilder = httpRequest consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', httpMode: 'POST',  customHeaders: [[name: 'Authorization', value: 'Basic YWRtaW46YWRtaW4=']], requestBody: """{\"name\":\"${serviceName}\",\"description\":\"${serviceDesc}\"}""", responseHandle: 'NONE', url: """http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/vsBuilderSessions"""
 			echo 'Response rspBuilder= ' + rspBuilder.content
             def jsonBuilder = readJSON text: rspBuilder.content
              sessionId = jsonBuilder['id'].toString()
@@ -123,15 +121,20 @@ node {
      def files = findFiles(glob: '**/RRPairs/**-r**.txt')
      //echo """${files[0].name} ${files[0].path} ${files[0].directory} ${files[0].length} ${files[0].lastModified}"""
 	def myFile = """${files[0].name}"""
-	// Windows use '\' Mac /Linux use '/'
-	def ws = pwd() + '\\RRPairs\\'
+	// Mac /Linux use '/'
+	def ws = pwd() + '/RRPairs/'
+	// Windows use '\\' Mac /Linux use '/'
+	//def ws = pwd() + '\\RRPairs\\'
 	
 	// iterate through files
     for (ii = 0; ii < files.size(); ii++) {
         echo 'working on ' + """${files[ii].name}"""
         myFile = ws  + """${files[ii].name}"""
 		echo 'myFile = ' + myFile
-         bat """curl -i -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" ""http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/bundles/${bundleId}/inputContainers/${inputContainerId}/contents"" -H \"content-type: multipart/form-data\" -F \"file=@${myFile}\"""" 
+        // Linux / Mac
+		sh(script: """curl -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/bundles/${bundleId}/inputContainers/${inputContainerId}/contents"" -H \"content-type: multipart/form-data\" -F \"file=@${myFile}\"""", returnStdout: true)
+        // Windows
+		//bat """curl -i -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" ""http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/bundles/${bundleId}/inputContainers/${inputContainerId}/contents"" -H \"content-type: multipart/form-data\" -F \"file=@${myFile}\"""" 
 		}   
     }
     
@@ -188,7 +191,10 @@ node {
 	
     stage('Deploy VS Zip')  {
        def zipFile = """${serviceName}.zip"""
-      bat """curl -X POST  ""http://${devTestServer}:1505/api/Dcm/VSEs/VSE/actions/deployMar"" -H \"authorization: Basic YWRtaW46YWRtaW4=\" -H \"content-type: multipart/form-data\" -F file=@${zipFile}""" 
+        // Linux / Mac
+		sh(script: """curl -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/api/Dcm/VSEs/VSE/actions/deployMar"" -H \"content-type: multipart/form-data\" -F \"file=@${zipFile}\"""", returnStdout: true)
+        // Windows
+		//bat """curl -X POST  ""http://${devTestServer}:1505/api/Dcm/VSEs/VSE/actions/deployMar"" -H \"authorization: Basic YWRtaW46YWRtaW4=\" -H \"content-type: multipart/form-data\" -F file=@${zipFile}""" 
    }
 
 }

@@ -18,27 +18,28 @@ node {
     
   stage('Retreive Project from Github') {
        // clean the workspace
-       //bat 'git clean -fdx'
+      // bat 'git clean -fdx'
        // Git Project downloaded to workspace
        git 'https://github.com/milka12/DT_VS_Test_RR_01'
    }
    
    stage('Get VSE ID') {
-        def responseVSEResponse = ''
-		//Linux / Mac using Credential in Jenkins Store
-        // withCredentials([usernamePassword(credentialsId: 'b3cc5e25-544b-434e-89f2-5085aa8c0fec', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-        // responseVSEResponse = sh(script: """curl -i -X GET -u $USERNAME:$PASSWORD  http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses""", returnStdout: true)
-        // }
-		// Linux / Mac Basic Authorization
-        //responseVSEResponse = sh(script: """curl -i -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses""", returnStdout: true)
+           def responseVSEResponse = ''
+		   //Linux / Mac using Credential in Jenkins Store
+           // withCredentials([usernamePassword(credentialsId: 'b3cc5e25-544b-434e-89f2-5085aa8c0fec', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+           // responseVSEResponse = sh(script: """curl -i -X GET -u $USERNAME:$PASSWORD  http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses""", returnStdout: true)
+           // }
+			// Linux / Mac Basic Authorization
+            responseVSEResponse = sh(script: """curl -i -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses""", returnStdout: true)
 			
 		// Windows using Credential in Jenkins Store
 		//withCredentials([usernamePassword(credentialsId: '5aec06db-b61e-4df4-a949-673793a6f5c6', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
         //  responseVSEResponse = bat returnStdout: true, script: """curl -i -X GET -u $USERNAME:$PASSWORD  http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses"""
 		//}
  		// Windows  Basic Authorization
-		responseVSEResponse = bat returnStdout: true, script: """curl -i -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses"""
-            echo 'Response VSEInfo= ' + responseVSEResponse
+		//responseVSEResponse = bat returnStdout: true, script: """curl -i -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses"""
+ 
+       echo 'Response VSEInfo= ' + responseVSEResponse
           //  def startID = responseVSEResponse.indexOf('invoke/api/v2/vses/') + 19
             def startID = responseVSEResponse.indexOf("""${vseServer}""") - 58
             def endID = startID + 46
@@ -48,15 +49,21 @@ node {
    
       stage('Get VSE Service List Begin') {
         // Get List of  virtual Services
-        // Windows
-		bat  """curl -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/services\" """
+        //  Linux / Mac
+        def serviceList = sh(script: """curl -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/services\"""", returnStdout: true)
+		// Windows
+		//bat  """curl -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/services\" """
+
     } 
+   
+
    
  stage('Deploy MarFiles') {
      // Get MAr files downloaded to workspace
     files = findFiles(glob: """**/VirtualServices/**${marType}.mar""")
     // set the workspace into a variable
-    def ws = pwd() + '\\VirtualServices\\'
+ 	// Windows use '\' Mac /Linux use '/'
+   def ws = pwd() + '/VirtualServices/'
      def myFile = """${files[0].name}"""
    // take .mar off file name for virtual service name
     def endID = myFile.indexOf('.')
@@ -70,13 +77,19 @@ node {
         endID = myFile.indexOf('.')
         myVSName = myFile.substring(0,endID)
         //Deploy Virtual Service
-        bat """curl -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/api/Dcm/VSEs/${vseServer}/actions/deployMar\" -H \"content-type: multipart/form-data\" -F \"file=@${myFile}\"""" 
+        //Windows
+		//      bat """curl -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/api/Dcm/VSEs/${vseServer}/actions/deployMar\" -H \"content-type: multipart/form-data\" -F \"file=@${myFile}\"""" 
+        // Linux / Mac
+		sh(script: """curl -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/api/Dcm/VSEs/${vseServer}/actions/deployMar\" -H \"content-type: multipart/form-data\" -F \"file=@${myFile}\"""", returnStdout: true)
     }
      
  }   
     stage('Get VSE Service List During') {
         // Get List of  virtual Services
-           bat  """curl -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/services\" """
+        //  Linux / Mac
+        def serviceList = sh(script: """curl -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/services\"""", returnStdout: true)
+		// Windows
+		//bat  """curl -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/services\" """
     } 
    
 
@@ -84,7 +97,8 @@ node {
     // Get test MAr files downloaded to workspace
     tfiles = findFiles(glob: """**/Tests/**${testNum}.mar""")
     // add worspace address to file name
-    def wst = pwd() + '\\Tests\\'
+ 	// Windows use '\' Mac /Linux use '/'
+    def wst = pwd() + '/Tests/'
     def myTFile = wst  + """${tfiles[0].name}"""
     // iterate through files
     defTestRsp = ''
@@ -92,14 +106,17 @@ node {
         echo 'working on ' + """${tfiles[ii].name}"""
         myTFile = wst  + """${tfiles[ii].name}"""
         // Run a Test against the virtual service
-        defTestRsp = bat returnStdout: true, script: """curl -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-test-invoke/api/v1/tests/run \" -H \"content-type: multipart/form-data\" -F \"file=@${myTFile}\"""" 
+		//Windows
+        //defTestRsp = bat returnStdout: true, script: """curl -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-test-invoke/api/v1/tests/run \" -H \"content-type: multipart/form-data\" -F \"file=@${myTFile}\"""" 
+        //Linux / Mac
+		defTestRsp = sh(script: """curl -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-test-invoke/api/v1/tests/run \" -H \"content-type: multipart/form-data\" -F \"file=@${myTFile}\"""", returnStdout: true)
        echo 'defTestRsp = ' +  """${defTestRsp}"""
        // tIDs
         def startID = defTestRsp.indexOf('"id":') + 6
         def endID = defTestRsp.indexOf('"name":"') - 2
         def tID = defTestRsp.substring(startID,endID)
         echo 'tID = ' +  """${tID}"""
-       //"id":"598A2D0795BF11E8A3D10200A5C6F465","name":"Bank_Test_0
+       // example "id":"598A2D0795BF11E8A3D10200A5C6F465","name":"Bank_Test_0
        tIDs.add("""${tID}""")
     }
 } 
@@ -111,48 +128,41 @@ stage ("wait_for_test") {
 }
 
 stage ("Get Test reports") {
-// iterate through files
+	// iterate through files
     for (ii = 0; ii < tIDs.size(); ii++) {
-        echo 'working on test' + """${tIDs[ii]}"""
+		echo 'working on test' + """${tIDs[ii]}"""
         // add worspace address to file name
         myTestID = """${tIDs[ii]}"""
         echo 'myTestID = ' + """${myTestID}"""
         //Get Test report
-      //  defTestRpt = bat returnStdout: true, script: """curl -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-test-invoke/api/v1/tests/reports/${myTestID} """ 
-        def defTestRpt = httpRequest httpMode:'GET',  customHeaders: [[name: 'Authorization', value: 'Basic YWRtaW46YWRtaW4=']], url: """http://${devTestServer}:1505/lisa-test-invoke/api/v1/tests/reports/${myTestID} """
-       // just the response will be the status
+		def defTestRpt = httpRequest httpMode:'GET',  customHeaders: [[name: 'Authorization', value: 'Basic YWRtaW46YWRtaW4=']], url: """http://${devTestServer}:1505/lisa-test-invoke/api/v1/tests/reports/${myTestID} """
+		// just the response will be the status
         echo 'defTestRpt status = ' +  """${defTestRpt}"""
         // get the content in JSON
-            def jsonTR = readJSON text: defTestRpt.content
-            //echo 'Response defTestRpt= ' + jsonTR
-            
+		def jsonTR = readJSON text: defTestRpt.content
+		// You can get the whole response body with the next line
+        //echo 'Response defTestRpt= ' + jsonTR
+        // Using JSON identifiers to get specific data    
         echo 'defTestRpt.testcaseName = ' + jsonTR['testcaseName'].toString() 
         echo 'defTestRpt.endedState = ' +  jsonTR['endedState'].toString() 
         echo 'defTestRpt.done = ' +  jsonTR['done'].toString() 
         echo 'defTestRpt.passCount = ' +  jsonTR['passCount'].toString() 
         echo 'defTestRpt.passCount = ' +  jsonTR['passCount'].toString() 
     }
-    
 }
    
    stage('Stop VS') {
-           
-    //  def files = findFiles(glob: '**/*.mar') 
-      
+     //  def files = findFiles(glob: '**/*.mar') 
      def myFile = """${files[0].name}"""
      def endID = myFile.indexOf('.')
-   
-   // take .mar off file name for virtual service name
+	// take .mar off file name for virtual service name
     myVSName = myFile.substring(0,endID)
-   
-  // iterate through files
+	// iterate through files
     for (ii = 0; ii < files.size(); ii++) {
         echo 'working on ' + """${files[ii].name}"""
         myFile = """${files[ii].name}"""
 		endID = myFile.indexOf('.')
 		myVSName = myFile.substring(0,endID)
-        // Stop virtual Service
-        //bat  """curl -X POST -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/api/Dcm/VSEs/${vseServer}/${myVSName}/actions/stop" """
 		//stop Virtual Services
         def responseStop = httpRequest httpMode:'POST',  customHeaders: [[name: 'Authorization', value: 'Basic YWRtaW46YWRtaW4=']], url: """http://${devTestServer}:1505/api/Dcm/VSEs/${vseServer}/${myVSName}/actions/stop"""
     }
@@ -170,13 +180,19 @@ stage ("Get Test reports") {
 		endID = myFile.indexOf('.')
 		myVSName = myFile.substring(0,endID)
         // Delete virtual Service
+		// Windows
         //   bat  """curl -X DELETE -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/api/Dcm/VSEs/${vseServer}/${myVSName}\" """
+		// Linux / Mac
+        sh(script: """curl -X DELETE -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/api/Dcm/VSEs/${vseServer}/${myVSName}\" """, returnStdout: true)
     }
   }
 
       stage('Get VSE Service List After') {
         // Get List of  virtual Services
-           bat  """curl -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/services\" """
+        //  Linux / Mac
+        def serviceList = sh(script: """curl -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/services\"""", returnStdout: true)
+		// Windows
+		//bat  """curl -X GET -H \"authorization: Basic YWRtaW46YWRtaW4=\" \"http://${devTestServer}:1505/lisa-virtualize-invoke/api/v2/vses/${vseID}/services\" """
    } 
 
 }
