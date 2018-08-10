@@ -1,0 +1,420 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Cars Inventory",
+        "description": "Swagger description of cars inventory REST services",
+        "version": "1.0.0"
+    },
+    "basePath": "/cars-inventory",
+    "paths": {
+        "/makes": {
+            "get": {
+                "operationId": "makesGet",
+                "description": "Gets `CarMake` objects.\nReturns a list of all car makes in the system.\n",
+                "responses": {
+                    "200": {
+                        "description": "An array of CarMake",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CarMake"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/models": {
+            "get": {
+                "operationId": "modelsGet",
+                "description": "Gets `CarModel` objects.\nReturns a list of all car models in the system.\n",
+                "responses": {
+                    "200": {
+                        "description": "An array of CarModel",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CarModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/carMake/{makeId}/models": {
+            "get": {
+                "operationId": "carMakeMakeIdModelsGet",
+                "description": "Gets `CarModel` objects.\nReturns a list of models by make in the system.\n",
+                "parameters": [
+                    {
+                        "name": "makeId",
+                        "in": "path",
+                        "description": "query models of this make id",
+                        "type": "integer",
+                        "format": "int64",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of CarModel",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CarModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/cars": {
+            "get": {
+                "operationId": "carsGet",
+                "description": "Gets `CarInventory` objects.\nReturns a list of all cars in the system.\n",
+                "responses": {
+                    "200": {
+                        "description": "An array of CarInventory",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CarInventory"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "carsPost",
+                "description": "Creates a new `CarInventory` object.\n",
+                "parameters": [
+                    {
+                        "name": "carInventory",
+                        "in": "body",
+                        "description": "Car to add",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CarInventory"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CarInventory object created",
+                        "schema": {
+                            "$ref": "#/definitions/CarInventory"
+                        }
+                    }
+                }
+            }
+        },
+        "/cars/{id}": {
+            "get": {
+                "operationId": "carsIdGet",
+                "description": "Gets `CarInventory` object.\nReturns the car for the given inventory id.\n",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id of the desired car",
+                        "type": "integer",
+                        "format": "int64",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CarInventory object",
+                        "schema": {
+                            "$ref": "#/definitions/CarInventory"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "operationId": "carsIdPut",
+                "description": "Updates a `CarInventory` object.\n",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id of the car to update",
+                        "type": "integer",
+                        "format": "int64",
+                        "required": true
+                    },
+                    {
+                        "name": "carInventory",
+                        "in": "body",
+                        "description": "Updated car information",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CarInventory"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated CarInventory object",
+                        "schema": {
+                            "$ref": "#/definitions/CarInventory"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "carsIdDelete",
+                "description": "Delete the car for the given inventory id.\n",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id of car to delete",
+                        "type": "integer",
+                        "format": "int64",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of CarInventory",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CarInventory"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/carInventory": {
+            "get": {
+                "operationId": "carInventoryGet",
+                "description": "Gets `CarInventory` objects.\nReturns a list of all cars in the system.\n",
+                "responses": {
+                    "200": {
+                        "description": "An array of CarInventory",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CarInventory"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/carInventory/{vin}": {
+            "get": {
+                "operationId": "carInventoryVinGet",
+                "description": "Gets `CarInventory` object.\nReturns the car for the given vin\n",
+                "parameters": [
+                    {
+                        "name": "vin",
+                        "in": "path",
+                        "description": "vin of the desired car",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CarInventory object",
+                        "schema": {
+                            "$ref": "#/definitions/CarInventory"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "CarMake": {
+            "type": "object",
+            "description": "A car make",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for a car make"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Name of the car make"
+                }
+            }
+        },
+        "CarType": {
+            "type": "object",
+            "description": "A car type",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for a car type"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Name of the car type"
+                }
+            }
+        },
+        "CarModel": {
+            "type": "object",
+            "description": "A car model",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for a car model"
+                },
+                "make": {
+                    "$ref": "#/definitions/CarMake"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Name of the model"
+                },
+                "subName": {
+                    "type": "string",
+                    "description": "More detail on this model"
+                },
+                "fuelType": {
+                    "type": "string",
+                    "description": "Type of fuel this model uses"
+                },
+                "modelYear": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Year of this model"
+                },
+                "type": {
+                    "$ref": "#/definitions/CarType"
+                }
+            }
+        },
+        "CarDealer": {
+            "type": "object",
+            "description": "A car dealership",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for a dealership"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Name of the dealership"
+                },
+                "address": {
+                    "type": "string",
+                    "description": "Street address"
+                },
+                "city": {
+                    "type": "string",
+                    "description": "City of the dealership"
+                },
+                "state": {
+                    "type": "string",
+                    "description": "State of the dealership"
+                },
+                "zip": {
+                    "type": "string",
+                    "description": "Zip code"
+                },
+                "telephone": {
+                    "type": "string",
+                    "description": "Phone number"
+                },
+                "website": {
+                    "type": "string",
+                    "description": "URL for the dealership website"
+                }
+            }
+        },
+        "CarInventory": {
+            "type": "object",
+            "description": "Represents a car",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for a car"
+                },
+                "stockNumber": {
+                    "type": "string",
+                    "description": "Stock number for the car"
+                },
+                "milage": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Miles on the car"
+                },
+                "color": {
+                    "type": "string",
+                    "description": "Color of the car"
+                },
+                "options": {
+                    "type": "string",
+                    "description": "Car options"
+                },
+                "vin": {
+                    "type": "string",
+                    "description": "Vehicle Identification Number"
+                },
+                "engine": {
+                    "type": "string",
+                    "description": "Description of the car's engine"
+                },
+                "transmission": {
+                    "type": "string",
+                    "description": "Type of transmission"
+                },
+                "carTrim": {
+                    "type": "string",
+                    "description": "Trim level of the car"
+                },
+                "modelYear": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Year of the car"
+                },
+                "owners": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Number of previous owners"
+                },
+                "image1": {
+                    "type": "string",
+                    "description": "First image file name"
+                },
+                "image2": {
+                    "type": "string",
+                    "description": "Second image file name"
+                },
+                "price": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Price of the car"
+                },
+                "makeid": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Unique id of the make"
+                },
+                "modelid": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Unique id of the model"
+                },
+                "model": {
+                    "$ref": "#/definitions/CarModel"
+                },
+                "dealer": {
+                    "$ref": "#/definitions/CarDealer"
+                }
+            }
+        }
+    }
+}
