@@ -1,0 +1,3 @@
+HTTP/1.1 200
+
+[{"class":"com.ca.lisa.demo.CarMake","id":1,"name":"Acura"},{"class":"com.ca.lisa.demo.CarMake","id":2,"name":"Audi"},{"class":"com.ca.lisa.demo.CarMake","id":3,"name":"BMW"},{"class":"com.ca.lisa.demo.CarMake","id":4,"name":"Buick"},{"class":"com.ca.lisa.demo.CarMake","id":5,"name":"Infiniti"},{"class":"com.ca.lisa.demo.CarMake","id":6,"name":"Land Rover"},{"class":"com.ca.lisa.demo.CarMake","id":7,"name":"Lexus"},{"class":"com.ca.lisa.demo.CarMake","id":8,"name":"Lincoln"},{"class":"com.ca.lisa.demo.CarMake","id":9,"name":"Volvo"}]

@@ -1,0 +1,7 @@
+POST /loan HTTP/1.1
+X-Api-Key: 89ba4c3d-3373-40ad-8a46-aec33f944fae
+Content-Type: application/json
+Connection: Keep-Alive
+User-Agent: LISA
+
+{"username":"lisa.simpson","firstName":"Lisa","lastName":"Simpson","address1":"5465 Legacy Dr","city":"Plano","state":"TX","zip":"75024","country":"US","dob":"01/01/1970","ssn":"111-22-3333","employer":"CA Technologies","phoneNumber":"123-456-7891","durationOfJob":"5 Years","income":"95808","loanTerm":3,"loanAmount":44224.0,"validateAddress":false}

@@ -1,0 +1,66 @@
+HTTP/1.1 200
+
+[{
+    "income": 95808,
+    "offers": [
+        {
+            "interestRate": 0.04975364927755608,
+            "bank": "CITI",
+            "interest": 6600.91615695192,
+            "payment": 1411.8032265819977,
+            "term": 3,
+            "id": 1,
+            "class": "com.ca.lisa.demo.CarLoanOffer",
+            "carLoan": {
+                "_ref": "../..",
+                "class": "com.ca.lisa.demo.CarLoan"
+            }
+        },
+        {
+            "interestRate": 0.09209246707612194,
+            "bank": "CHASE",
+            "interest": 12218.09179192325,
+            "payment": 1567.8358831089793,
+            "term": 3,
+            "id": 2,
+            "class": "com.ca.lisa.demo.CarLoanOffer",
+            "carLoan": {
+                "_ref": "../..",
+                "class": "com.ca.lisa.demo.CarLoan"
+            }
+        },
+        {
+            "interestRate": 0.10903470730418495,
+            "bank": "BOFA",
+            "interest": 14465.852687460825,
+            "payment": 1630.2736857628006,
+            "term": 3,
+            "id": 3,
+            "class": "com.ca.lisa.demo.CarLoanOffer",
+            "carLoan": {
+                "_ref": "../..",
+                "class": "com.ca.lisa.demo.CarLoan"
+            }
+        }
+    ],
+    "zip": "75024",
+    "country": "US",
+    "lastName": "Simpson",
+    "loanTermInMonths": 36,
+    "city": "Plano",
+    "address1": "5465 Legacy Dr",
+    "durationOfJob": "5 Years",
+    "loanAmount": 44224,
+    "ssn": "111-22-3333",
+    "firstName": "Lisa",
+    "loanTerm": 3,
+    "createdDate": "2016-01-08T14:36:36Z",
+    "phoneNumber": "123-456-7891",
+    "dob": "02/28/1972",
+    "employer": "CA Technologies",
+    "id": 1,
+    "state": "TX",
+    "validateAddress": false,
+    "class": "com.ca.lisa.demo.CarLoan",
+    "username": "lisa.simpson"
+}]
